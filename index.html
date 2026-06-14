@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<title>Iron Log</title>
+<meta name="theme-color" content="#06070A" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Iron Log" />
+<link rel="manifest" href='data:application/json,{"name":"Iron Log","short_name":"IronLog","display":"standalone","background_color":"%2306070A","theme_color":"%2306070A","start_url":"."}' />
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%2306070A'/%3E%3Ctext x='90' y='124' font-size='96' text-anchor='middle'%3E%F0%9F%94%A5%3C/text%3E%3C/svg%3E" />
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js" crossorigin></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#06070A}
+.il-root{--display:'Oswald',system-ui,sans-serif;--body:'Inter',system-ui,sans-serif;position:relative;min-height:100vh;overflow:hidden;background:#06070A;color:#EDEEF1;font-family:var(--body);-webkit-font-smoothing:antialiased}
+.il-aurora{position:fixed;inset:0;z-index:0;filter:blur(60px) saturate(155%);pointer-events:none;overflow:hidden}
+.il-blob{position:absolute;border-radius:50%;opacity:.6;mix-blend-mode:screen;will-change:transform;transition:background .7s ease}
+.il-b1{width:75vw;height:75vw;top:-18%;left:-22%;background:var(--c1);animation:f1 12s ease-in-out infinite}
+.il-b2{width:68vw;height:68vw;top:22%;right:-28%;background:var(--c2);animation:f2 15s ease-in-out infinite}
+.il-b3{width:64vw;height:64vw;bottom:-16%;left:-12%;background:var(--c3);animation:f3 18s ease-in-out infinite}
+.il-b4{width:58vw;height:58vw;bottom:-8%;right:-16%;background:var(--c1);opacity:.4;animation:f1 14s ease-in-out infinite reverse}
+@keyframes f1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(9vw,-7vw) scale(1.18)}}
+@keyframes f2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-8vw,6vw) scale(1.12)}}
+@keyframes f3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(7vw,5vw) scale(1.22)}}
+.il-content{position:relative;z-index:1;max-width:480px;margin:0 auto;padding:max(22px,env(safe-area-inset-top)) 16px 48px}
+.glass{background:rgba(20,22,30,.5);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,.10);box-shadow:0 8px 30px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.08)}
+.glass-soft{background:rgba(255,255,255,.05);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.08)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.3)}100%{transform:scale(1)}}
+@keyframes shimmer{0%{background-position:-180% 0}100%{background-position:180% 0}}
+@keyframes ping{0%{transform:scale(1);opacity:.9}70%{transform:scale(1.5);opacity:0}100%{opacity:0}}
+.in{animation:fadeUp .5s cubic-bezier(.2,.8,.2,1) both}
+.fade{animation:fadeIn .4s ease both}
+.il-btn{cursor:pointer;transition:transform .15s cubic-bezier(.2,.8,.2,1),box-shadow .2s,background .2s,border-color .2s,color .2s}
+.il-btn:active{transform:scale(.95)}
+.check{display:grid;place-items:center;border-radius:11px;border:1.5px solid;cursor:pointer;transition:all .2s cubic-bezier(.2,.8,.2,1)}
+.check.on{animation:pop .35s ease;box-shadow:0 0 18px -2px var(--accent)}
+.barFill{position:relative;height:100%;border-radius:999px;transition:width .5s cubic-bezier(.2,.8,.2,1);overflow:hidden}
+.barFill::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.45) 50%,transparent 70%);background-size:200% 100%;animation:shimmer 2.2s linear infinite}
+.il-input{width:100%;background:rgba(0,0,0,.3);border:1.5px solid rgba(255,255,255,.12);border-radius:11px;padding:10px 11px;color:#fff;font-size:17px;font-family:var(--display);font-weight:600;outline:none;transition:border-color .2s}
+.il-input:focus{border-color:var(--accent)}
+.dot{aspect-ratio:1;border-radius:8px;border:1.5px solid;cursor:pointer;transition:all .25s cubic-bezier(.2,.8,.2,1)}
+.dot.on{box-shadow:0 0 12px -2px var(--accent)}
+ul{margin:0;padding-left:18px}
+@media (prefers-reduced-motion:reduce){.il-blob,.barFill::after{animation:none!important}.in,.fade{animation:none!important}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+/* ---------- storage: localStorage (with safe fallback) ---------- */
+const KEY = "ironlog_data_v1";
+const store = {
+  load(){ try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } },
+  save(o){ try { localStorage.setItem(KEY, JSON.stringify(o)); return true; } catch { return false; } },
+};
+
+/* ---------- plan data ---------- */
+const lower = (n)=>/squat|deadlift|leg press|hip thrust|lunge|leg curl|calf|romanian/i.test(n);
+const DAYS=[{key:"push",label:"Push",sub:"Chest · Shoulders · Tri"},{key:"pull",label:"Pull",sub:"Back · Biceps"},{key:"legs",label:"Legs",sub:"Quads · Hams · Calves"},{key:"upper",label:"Upper",sub:"Chest + Back"},{key:"lower",label:"Lower",sub:"Posterior chain"}];
+const W={
+1:{push:[["Barbell Bench Press",3,8],["Incline DB Press",3,8],["Seated DB Shoulder Press",3,8],["Lateral Raise",3,12],["Triceps Rope Pushdown",3,12]],pull:[["Deadlift",3,6],["Lat Pulldown",3,8],["Seated Cable Row",3,8],["Face Pull",3,12],["Barbell Curl",3,12]],legs:[["Back Squat",3,8],["Romanian Deadlift",3,8],["Leg Press",3,10],["Lying Leg Curl",3,12],["Standing Calf Raise",3,15]],upper:[["Incline Barbell Press",3,8],["Barbell Row",3,8],["Lat Pulldown",3,10],["Lateral Raise",3,12],["EZ-Bar Curl",3,12]],lower:[["Leg Press",3,10],["Hip Thrust",3,8],["Walking Lunge",3,10,true],["Seated Leg Curl",3,12],["Standing Calf Raise",3,15]]},
+2:{push:[["Barbell Bench Press",4,8],["Incline DB Press",4,8],["Seated DB Shoulder Press",3,8],["Lateral Raise",3,12],["Triceps Rope Pushdown",3,12]],pull:[["Deadlift",3,6],["Lat Pulldown",4,8],["Seated Cable Row",4,8],["Face Pull",3,12],["Barbell Curl",3,12]],legs:[["Back Squat",4,8],["Romanian Deadlift",3,8],["Leg Press",4,10],["Lying Leg Curl",3,12],["Standing Calf Raise",3,15]],upper:[["Incline Barbell Press",4,8],["Barbell Row",4,8],["Lat Pulldown",3,10],["Lateral Raise",3,12],["EZ-Bar Curl",3,12]],lower:[["Leg Press",4,10],["Hip Thrust",4,8],["Walking Lunge",3,10,true],["Seated Leg Curl",3,12],["Standing Calf Raise",3,15]]},
+3:{push:[["Barbell Bench Press",4,6],["Incline DB Press",4,6],["Seated DB Shoulder Press",3,6],["Lateral Raise",4,10],["Triceps Rope Pushdown",4,10]],pull:[["Deadlift",3,5],["Lat Pulldown",4,6],["Seated Cable Row",4,6],["Face Pull",4,10],["Barbell Curl",4,10]],legs:[["Back Squat",4,6],["Romanian Deadlift",3,6],["Leg Press",4,8],["Lying Leg Curl",4,10],["Standing Calf Raise",4,12]],upper:[["Incline Barbell Press",4,6],["Barbell Row",4,6],["Lat Pulldown",4,8],["Lateral Raise",4,10],["EZ-Bar Curl",4,10]],lower:[["Leg Press",4,8],["Hip Thrust",4,6],["Walking Lunge",3,8,true],["Seated Leg Curl",4,10],["Standing Calf Raise",4,12]]},
+4:{push:[["Barbell Bench Press",2,8],["Incline DB Press",2,8],["Seated DB Shoulder Press",2,8],["Lateral Raise",2,12],["Triceps Rope Pushdown",2,12]],pull:[["Deadlift",2,5],["Lat Pulldown",2,8],["Seated Cable Row",2,8],["Face Pull",2,12],["Barbell Curl",2,12]],legs:[["Back Squat",2,8],["Romanian Deadlift",2,8],["Leg Press",2,10],["Lying Leg Curl",2,12],["Standing Calf Raise",2,15]],upper:[["Incline Barbell Press",2,8],["Barbell Row",2,8],["Lat Pulldown",2,10],["Lateral Raise",2,12],["EZ-Bar Curl",2,12]],lower:[["Leg Press",2,10],["Hip Thrust",2,8],["Walking Lunge",2,10,true],["Seated Leg Curl",2,12],["Standing Calf Raise",2,15]]}};
+const WEEKS=[{n:1,rpe:"RPE 7",cue:"~3 reps in tank · find your weights",accent:"#38BDF8",tag:"BUILD"},{n:2,rpe:"RPE 8",cue:"~2 reps in tank · add load where easy",accent:"#FBBF24",tag:"GROW"},{n:3,rpe:"RPE 9",cue:"~1 rep in tank · peak, push hard",accent:"#FB4D3D",tag:"PEAK"},{n:4,rpe:"RPE 5–6",cue:"~60% load · recover, don't grind",accent:"#34D399",tag:"DELOAD"}];
+const DIET_ACCENT="#5EEAD4";
+const PALETTE={1:["#38BDF8","#2563EB","#0EA5E9"],2:["#FBBF24","#F97316","#F59E0B"],3:["#FB4D3D","#EF4444","#FB923C"],4:["#34D399","#10B981","#22D3EE"]};
+const DIET_PAL=["#5EEAD4","#2DD4BF","#22D3EE"];
+const WARMUP={push:["5 min easy cardio (bike / treadmill)","Band pull-aparts 2 × 15","Arm circles + shoulder rolls 1 min","Empty-bar bench 2 × 10 (ramp-up)"],pull:["5 min easy cardio","Band pull-aparts 2 × 15","Dead hang / scap pulls 2 × 8","Light lat pulldown 1 × 12 feeler"],legs:["5 min easy cardio","Leg swings front + side 1 min","Bodyweight squats 2 × 15","Glute bridges 2 × 15","Bar-only squats 2 × 8"],upper:["5 min easy cardio","Band pull-aparts 2 × 15","Arm circles 1 min","Light row + light bench feeler sets"],lower:["5 min easy cardio","Leg swings 1 min","Glute bridges 2 × 15","Bodyweight squats 2 × 15","Ankle rocks 1 min"]};
+const COMMON={title:"Daily Core + Cardio",items:["Plank 3 × 40 sec","Hanging Leg Raise 3 × 12","Cable Crunch 3 × 15","10–15 min incline walk"],note:"Sabhi 5 din. Abs jaldi recover. Bahut thake ho to core 3×/week. Incline walk fat-loss ke liye."};
+const COOLDOWN={push:["Doorway chest stretch 30s/side","Overhead triceps 30s/side","Cross-body shoulder 30s/side"],pull:["Lat stretch (hold bar) 30s/side","Child's pose 45s","Biceps wall stretch 30s/side"],legs:["Standing quad 30s/side","Seated hamstring 30s/side","Hip-flexor lunge 30s/side","Calf wall stretch 30s/side"],upper:["Doorway chest 30s/side","Lat stretch 30s/side","Child's pose 45s"],lower:["Hamstring stretch 30s/side","Figure-4 glute 30s/side","Hip-flexor lunge 30s/side","Calf stretch 30s/side"]};
+const DIET={targets:[{k:"Calories",v:"≈2350"},{k:"Protein",v:"155g"},{k:"Carbs",v:"250g"},{k:"Fat",v:"78g"}],meals:[{time:"Breakfast · Overnight Oats",food:"Quaker rolled oats 70g + 250ml milk + 1 scoop whey + banana + 1 tbsp peanut butter. Soak in FRIDGE overnight (no cooking).",p:"~42g"},{time:"Eggs (split across day)",food:"7 whole eggs total — boiled or omelette. 3–4 with breakfast, 3 in evening.",p:"~42g"},{time:"Lunch",food:"Roti/rice + dal + curd + salad + veg. Chicken/paneer optional, 2–3×/week.",p:"~28g"},{time:"Post-workout",food:"1 scoop whey + banana (or roasted chana).",p:"~28g"},{time:"Dinner",food:"Roti + dal / rajma / chole + curd + veg.",p:"~22g"}],notes:["No gas? No-cook pe focus: overnight oats, curd, milk, fruit, nuts, whey. Dal/roti tiffin ya bahar se.","Oats FRIDGE mein rakho, FREEZER mein nahi — warna patthar ban jayega.","Chicken/paneer daily zaroori nahi. 7 eggs + whey + dal + curd = protein sorted.","7 eggs se fat already high (~35g). Ghee/oil/extra nuts limit karo.","Rajma/chole/soya = sasta protein booster, week mein 3–4×.","3–4 L paani. Sleep 7–8 hrs. Week mein 1 cheat meal theek hai."]};
+
+const D="'Oswald',system-ui,sans-serif";
+
+/* ---------- App ---------- */
+function App(){
+  const init = store.load();
+  const [mode,setMode]=useState("train");
+  const [week,setWeek]=useState(1);
+  const [day,setDay]=useState("push");
+  const [logs,setLogs]=useState(init.logs||{});
+  const [bw,setBw]=useState(init.bw||{});
+  const [flags,setFlags]=useState(init.flags||{});
+  const [meals,setMeals]=useState(init.meals||{});
+  const [water,setWater]=useState(init.water||0);
+  const [saved,setSaved]=useState(false);
+  const [showGuide,setShowGuide]=useState(false);
+  const [open,setOpen]=useState({warm:true,core:false,stretch:false});
+
+  useEffect(()=>{ const ok=store.save({logs,bw,flags,meals,water}); setSaved(ok); }, [logs,bw,flags,meals,water]);
+
+  const meta=WEEKS[week-1];
+  const accent= mode==="diet"?DIET_ACCENT:meta.accent;
+  const pal= mode==="diet"?DIET_PAL:PALETTE[week];
+  const ex=W[week][day];
+  const k=(wk,d,i)=>wk+":"+d+":"+i;
+  const getLog=(wk,d,i)=>logs[k(wk,d,i)]||{};
+  const upd=(i,f,v)=>setLogs(p=>({...p,[k(week,day,i)]:{...p[k(week,day,i)],[f]:v}}));
+  const toggleDone=(i)=>setLogs(p=>{const x=p[k(week,day,i)]||{};return {...p,[k(week,day,i)]:{...x,done:!x.done}};});
+  const fk=(n)=>week+":"+day+":"+n;
+  const flag=(n)=>!!flags[fk(n)];
+  const toggleFlag=(n)=>setFlags(p=>({...p,[fk(n)]:!p[fk(n)]}));
+  const dayDone=ex.filter((_,i)=>getLog(week,day,i).done).length;
+  const pct=Math.round(dayDone/ex.length*100);
+
+  const rootStyle={"--accent":accent,"--c1":pal[0],"--c2":pal[1],"--c3":pal[2]};
+
+  return (
+   <div className="il-root" style={rootStyle}>
+    <div className="il-aurora"><div className="il-blob il-b1"/><div className="il-blob il-b2"/><div className="il-blob il-b3"/><div className="il-blob il-b4"/></div>
+    <div className="il-content">
+      <header className="in" style={{marginBottom:14}}>
+        <div style={F.row}>
+          <div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:20}}>🔥</span><span style={F.brand}>IRON&nbsp;LOG</span></div>
+          <span style={{fontSize:11,color:saved?accent:"#7B818C",fontWeight:500}}>{saved?"✓ Saved":"…"}</span>
+        </div>
+        <p style={F.sub}>home-screen app · saves on this phone</p>
+      </header>
+
+      <div className="glass in" style={F.modeTrack}>
+        <div style={{...F.modePill,left:mode==="train"?"3px":"calc(50%)",background:accent}}/>
+        <button className="il-btn" style={{...F.modeBtn,color:mode==="train"?"#06070A":"#C2C7CF"}} onClick={()=>setMode("train")}>🏋 Train</button>
+        <button className="il-btn" style={{...F.modeBtn,color:mode==="diet"?"#06070A":"#C2C7CF"}} onClick={()=>setMode("diet")}>🍎 Diet</button>
+      </div>
+
+      {mode==="train"?(<>
+        <div style={F.weekRow} className="in">
+          {WEEKS.map(w=>{const a=w.n===week;return(
+            <button key={w.n} className="il-btn glass" onClick={()=>setWeek(w.n)} style={{...F.weekBtn,borderColor:a?w.accent:"rgba(255,255,255,.10)",boxShadow:a?("0 0 22px -6px "+w.accent):"none",color:a?w.accent:"#8A8F98"}}>
+              <span style={F.weekNum}>W{w.n}</span><span style={F.weekTag}>{w.tag}</span>
+            </button>);})}
+        </div>
+
+        <div className="glass fade" key={"ban"+week} style={{...F.banner,borderColor:accent+"66"}}>
+          <div><div style={{...F.bannerRpe,color:accent}}>{meta.rpe}</div><div style={F.bannerCue}>{meta.cue}</div></div>
+          {week===4&&<span style={{...F.deload,color:accent,borderColor:accent}}>DELOAD</span>}
+        </div>
+
+        <div style={F.dayScroll}>
+          {DAYS.map(d=>{const a=d.key===day;return(
+            <button key={d.key} className="il-btn" onClick={()=>setDay(d.key)} style={{...F.dayChip,background:a?"#fff":"rgba(255,255,255,.06)",color:a?"#06070A":"#9AA0AB",borderColor:a?"#fff":"rgba(255,255,255,.10)"}}>{d.label}</button>);})}
+        </div>
+        <p style={F.daySub}>{DAYS.find(d=>d.key===day).sub}</p>
+
+        <RestTimer accent={accent}/>
+
+        <Section title="Warm-up · dynamic" hint="before lifting" open={open.warm} onToggle={()=>setOpen(o=>({...o,warm:!o.warm}))} done={flag("warm")} onDone={()=>toggleFlag("warm")} accent={accent} mt>
+          <ul>{WARMUP[day].map((t,i)=><li key={i} style={F.li}>{t}</li>)}</ul>
+          <p style={F.tiny}>Lifting se pehle sirf dynamic. Pehle big lift pe 1–2 light ramp-up sets.</p>
+        </Section>
+
+        <div style={F.progWrap}><div style={F.progTrack}><div className="barFill" style={{width:pct+"%",background:accent}}/></div><span style={F.progLabel}>{dayDone}/{ex.length}</span></div>
+
+        <div key={week+"-"+day} style={F.list}>
+          {ex.map((e,i)=>{const[name,sets,reps,perLeg]=e;const log=getLog(week,day,i);const prev=week>1?getLog(week-1,day,i):null;const hit=log.done&&Number(log.reps)>=reps;const inc=lower(name)?5:2.5;return(
+            <div key={i} className="glass in" style={{...F.card,animationDelay:i*55+"ms",borderColor:log.done?accent+"99":"rgba(255,255,255,.10)",boxShadow:log.done?("0 8px 30px rgba(0,0,0,.35), 0 0 22px -10px "+accent):undefined}}>
+              <div style={F.cardTop}><div style={F.exName}>{name}</div><CheckBox on={log.done} onClick={()=>toggleDone(i)} accent={accent}/></div>
+              <div style={F.target}>{sets} × {reps}{perLeg?" /leg":""} · {meta.rpe}</div>
+              <div style={F.inputRow}>
+                <Field label="Weight (kg)" value={log.weight||""} onChange={v=>upd(i,"weight",v)} placeholder={prev&&prev.weight?("last "+prev.weight):"—"} accent={accent}/>
+                <Field label="Reps done" value={log.reps||""} onChange={v=>upd(i,"reps",v)} placeholder={""+reps} accent={accent}/>
+              </div>
+              {prev&&prev.weight&&<div style={F.lastNote}>Last week: <b style={{color:"#D6DAE0"}}>{prev.weight}kg × {prev.reps||"?"}</b></div>}
+              {hit&&week!==4&&<div style={{...F.suggest,color:accent}}>📈 Target hit — next +{inc}kg</div>}
+            </div>);})}
+        </div>
+
+        <Section title={COMMON.title} hint="all 5 days" open={open.core} onToggle={()=>setOpen(o=>({...o,core:!o.core}))} done={flag("core")} onDone={()=>toggleFlag("core")} accent={accent} mt>
+          <ul>{COMMON.items.map((t,i)=><li key={i} style={F.li}>{t}</li>)}</ul><p style={F.tiny}>{COMMON.note}</p>
+        </Section>
+        <Section title="Cool-down · stretch" hint="after lifting" open={open.stretch} onToggle={()=>setOpen(o=>({...o,stretch:!o.stretch}))} done={flag("stretch")} onDone={()=>toggleFlag("stretch")} accent={accent} mt>
+          <ul>{COOLDOWN[day].map((t,i)=><li key={i} style={F.li}>{t}</li>)}</ul><p style={F.tiny}>Static stretch sirf workout ke BAAD. Bounce mat karo.</p>
+        </Section>
+
+        <div className="glass" style={F.bwCard}><span style={F.bwLabel}>Bodyweight this week</span><div style={{display:"flex",alignItems:"center",gap:6}}><input className="il-input" inputMode="decimal" value={bw[week]||""} onChange={e=>setBw(p=>({...p,[week]:e.target.value}))} placeholder="71" style={{width:66,textAlign:"center"}}/><span style={{fontSize:13,color:"#7B818C"}}>kg</span></div></div>
+
+        <button className="glass il-btn" style={F.guideToggle} onClick={()=>setShowGuide(s=>!s)}><span>ⓘ Rules: failure · RPE · rest days</span><span style={{transform:showGuide?"rotate(180deg)":"none",transition:"transform .3s",display:"inline-block"}}>▾</span></button>
+        {showGuide&&<div className="fade" style={{marginTop:8,display:"flex",flexDirection:"column",gap:10}}>
+          <Guide title="Rest between sets">Compounds (bench/squat/deadlift): 2–3 min. Isolation (curls/raises): 60–90 sec. Use the timer above.</Guide>
+          <Guide title="Rest days (weekly)">Day1 Push · Day2 Pull · Day3 Legs · REST · Day4 Upper · Day5 Lower · REST. Har muscle ~48 hrs recovery.</Guide>
+          <Guide title="Set fail ho jaye to">1 set miss → next set ~10% halka. Same weight 2 sessions fail → ruko. Har set fail → 5–10% drop.</Guide>
+          <Guide title="Weight kab badhao">Saare sets top rep RPE pe → upper +2.5kg, lower +5kg. Reps pehle, weight baad mein.</Guide>
+        </div>}
+        <button className="il-btn" style={F.reset} onClick={()=>{if(confirm("Saara workout data hata du?")){setLogs({});setBw({});setFlags({});}}}>↺ Reset workout data</button>
+      </>):(
+      <div className="fade">
+        <div className="glass" style={{...F.banner,borderColor:accent+"66",marginTop:2}}><div><div style={{...F.bannerRpe,color:accent}}>Daily
