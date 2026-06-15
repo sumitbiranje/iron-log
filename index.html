@@ -195,4 +195,135 @@ function App(){
         <button className="il-btn" style={F.reset} onClick={()=>{if(confirm("Saara workout data hata du?")){setLogs({});setBw({});setFlags({});}}}>↺ Reset workout data</button>
       </>):(
       <div className="fade">
-        <div className="glass" style={{...F.banner,borderColor:accent+"66",marginTop:2}}><div><div style={{...F.bannerRpe,color:accent}}>Daily
+        <div className="glass" style={{...F.banner,borderColor:accent+"66",marginTop:2}}><div><div style={{...F.bannerRpe,color:accent}}>Daily Targets</div><div style={F.bannerCue}>No-cook friendly · 7 eggs + whey base</div></div></div>
+        <div style={F.macroGrid}>{DIET.targets.map((t,i)=><div key={t.k} className="glass in" style={{...F.macroCard,animationDelay:i*60+"ms"}}><div style={{...F.macroVal,color:accent}}>{t.v}</div><div style={F.macroKey}>{t.k}</div></div>)}</div>
+        <div className="glass" style={F.waterCard}>
+          <div style={{...F.row,marginBottom:10}}><span style={F.bwLabel}>💧 Water — {water}/12</span><span style={{fontSize:11,color:"#7B818C"}}>~3 L</span></div>
+          <div style={F.waterDots}>{Array.from({length:12}).map((_,i)=><button key={i} className={"dot"+(i<water?" on":"")} onClick={()=>setWater(i+1===water?i:i+1)} style={{background:i<water?accent:"transparent",borderColor:i<water?accent:"rgba(255,255,255,.16)"}}/>)}</div>
+        </div>
+        <div style={F.list}>{DIET.meals.map((m,i)=>(
+          <div key={i} className="glass in" style={{...F.card,animationDelay:i*55+"ms",borderColor:meals[i]?accent+"99":"rgba(255,255,255,.10)",boxShadow:meals[i]?("0 8px 30px rgba(0,0,0,.35), 0 0 22px -10px "+accent):undefined}}>
+            <div style={F.cardTop}><div><div style={F.exName}>{m.time}</div><div style={{fontSize:11,fontWeight:600,color:accent,marginTop:3}}>{m.p} protein</div></div><CheckBox on={!!meals[i]} onClick={()=>setMeals(p=>({...p,[i]:!p[i]}))} accent={accent}/></div>
+            <div style={F.mealFood}>{m.food}</div>
+          </div>))}
+        </div>
+        <button className="il-btn" style={F.reset} onClick={()=>{setMeals({});setWater(0);}}>↺ Reset today's meals</button>
+        <div style={{marginTop:14,display:"flex",flexDirection:"column",gap:9}}>{DIET.notes.map((n,i)=><div key={i} className="glass-soft" style={F.dietNote}>{n}</div>)}</div>
+      </div>)}
+      <p style={F.footer}>Saves on this phone (localStorage). General fitness guidance, not medical advice — stop if you feel sharp pain.</p>
+    </div>
+   </div>
+  );
+}
+
+function RestTimer({accent}){
+  const [total,setTotal]=useState(90);
+  const [left,setLeft]=useState(0);
+  const [run,setRun]=useState(false);
+  useEffect(()=>{
+    if(!run) return;
+    if(left<=0){ setRun(false); try{navigator.vibrate&&navigator.vibrate([200,120,200]);}catch(e){} return; }
+    const id=setTimeout(()=>setLeft(l=>l-1),1000);
+    return ()=>clearTimeout(id);
+  },[run,left]);
+  const start=(s)=>{setTotal(s);setLeft(s);setRun(true);};
+  const active=run||left>0;
+  const frac=active?Math.max(0,left/total):0;
+  const mm=Math.floor(left/60), ss=(""+(left%60)).padStart(2,"0");
+  const presets=[[60,"1:00"],[90,"1:30"],[120,"2:00"],[180,"3:00"]];
+  return(
+   <div className="glass" style={F.timerCard}>
+    <div style={{position:"relative",width:76,height:76,flex:"0 0 auto"}}>
+      <div style={{width:76,height:76,borderRadius:"50%",background:"conic-gradient("+accent+" "+(frac*360)+"deg, rgba(255,255,255,.10) 0deg)",transition:"background .3s linear"}}/>
+      <div style={{position:"absolute",inset:6,borderRadius:"50%",background:"rgba(10,11,15,.85)",display:"grid",placeItems:"center",border:"1px solid rgba(255,255,255,.08)"}}>
+        <span style={{fontFamily:D,fontWeight:700,fontSize:18,color:active?accent:"#7B818C"}}>{active?(mm+":"+ss):"⏱"}</span>
+      </div>
+      {active&&left<=3&&left>0&&<span style={{position:"absolute",inset:0,borderRadius:"50%",border:"2px solid "+accent,animation:"ping 1s ease-out infinite"}}/>}
+    </div>
+    <div style={{flex:1,minWidth:0}}>
+      <div style={{fontFamily:D,fontWeight:600,fontSize:14,marginBottom:8}}>Rest timer</div>
+      {active?(
+        <div style={{display:"flex",gap:8}}>
+          <button className="il-btn" onClick={()=>setLeft(l=>l+30)} style={{...F.timerBtn,color:accent,borderColor:accent+"66"}}>+30s</button>
+          <button className="il-btn" onClick={()=>{setRun(false);setLeft(0);}} style={{...F.timerBtn,color:"#D17A72",borderColor:"rgba(209,122,114,.4)"}}>■ Stop</button>
+        </div>
+      ):(
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:7}}>
+          {presets.map(p=><button key={p[0]} className="il-btn" onClick={()=>start(p[0])} style={{...F.timerBtn,justifyContent:"center"}}>{p[1]}</button>)}
+        </div>
+      )}
+    </div>
+   </div>);
+}
+
+function Section({title,hint,open,onToggle,done,onDone,accent,children,mt}){
+  return(
+   <div className="glass" style={{...F.section,marginTop:mt?12:14}}>
+    <div style={F.sectionHead} onClick={onToggle}>
+      <span style={F.sectionTitle}>{title} {hint&&<span style={F.sectionHint}>· {hint}</span>}</span>
+      <div style={{display:"flex",alignItems:"center",gap:10}}>
+        {onDone&&<span className="il-btn" onClick={(e)=>{e.stopPropagation();onDone();}} style={{...F.donePill,color:done?"#06070A":accent,background:done?accent:"transparent",borderColor:accent}}>{done?"Done":"Mark"}</span>}
+        <span style={{transform:open?"rotate(180deg)":"none",transition:"transform .3s",display:"inline-block",color:"#8A8F98"}}>▾</span>
+      </div>
+    </div>
+    {open&&<div className="fade" style={F.sectionBody}>{children}</div>}
+   </div>);
+}
+function CheckBox({on,onClick,accent}){return <button className={"check il-btn"+(on?" on":"")} onClick={onClick} style={{width:30,height:30,background:on?accent:"transparent",borderColor:on?accent:"rgba(255,255,255,.22)",color:on?"#06070A":"#6A6E78",fontWeight:900,fontSize:15,lineHeight:1}}>✓</button>;}
+function Field({label,value,onChange,placeholder,accent}){return(<label style={{display:"flex",flexDirection:"column",gap:5}}><span style={F.fieldLabel}>{label}</span><input className="il-input" inputMode="decimal" value={value} placeholder={placeholder} onChange={e=>onChange(e.target.value)} style={{"--accent":accent}}/></label>);}
+function Guide({title,children}){return <div className="glass-soft" style={{borderRadius:12,padding:"12px 14px"}}><div style={{fontFamily:D,fontWeight:600,fontSize:14,marginBottom:5}}>{title}</div><div style={{fontSize:12.5,lineHeight:1.55,color:"#A2A7B0"}}>{children}</div></div>;}
+
+const F={
+  row:{display:"flex",alignItems:"center",justifyContent:"space-between"},
+  brand:{fontFamily:D,fontWeight:700,fontSize:22,letterSpacing:"0.06em"},
+  sub:{margin:"4px 0 0",fontSize:12,color:"#6E737D"},
+  modeTrack:{position:"relative",display:"grid",gridTemplateColumns:"1fr 1fr",padding:3,borderRadius:14,marginBottom:16,height:44},
+  modePill:{position:"absolute",top:3,bottom:3,width:"calc(50% - 3px)",borderRadius:11,transition:"left .3s cubic-bezier(.2,.8,.2,1)"},
+  modeBtn:{position:"relative",zIndex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:7,background:"transparent",border:"none",fontFamily:D,fontWeight:600,fontSize:15,cursor:"pointer"},
+  weekRow:{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:14},
+  weekBtn:{display:"flex",flexDirection:"column",alignItems:"center",gap:2,padding:"10px 0",borderRadius:13,border:"1px solid"},
+  weekNum:{fontFamily:D,fontWeight:700,fontSize:16},weekTag:{fontSize:9,fontWeight:600,letterSpacing:"0.08em"},
+  banner:{display:"flex",justifyContent:"space-between",alignItems:"center",borderRadius:16,padding:"13px 15px",marginBottom:16},
+  bannerRpe:{fontFamily:D,fontWeight:700,fontSize:18},bannerCue:{fontSize:12,color:"#AEB3BC",marginTop:2},
+  deload:{fontSize:10,fontWeight:700,letterSpacing:"0.1em",border:"1px solid",borderRadius:999,padding:"3px 8px"},
+  dayScroll:{display:"flex",gap:8,overflowX:"auto",paddingBottom:4,marginBottom:6},
+  dayChip:{flex:"0 0 auto",padding:"8px 16px",borderRadius:999,border:"1px solid",fontFamily:D,fontWeight:600,fontSize:14,whiteSpace:"nowrap"},
+  daySub:{margin:"2px 2px 14px",fontSize:12,color:"#6E737D"},
+  timerCard:{display:"flex",alignItems:"center",gap:14,borderRadius:16,padding:"12px 14px",marginBottom:14,position:"sticky",top:8,zIndex:5},
+  timerBtn:{display:"flex",alignItems:"center",gap:4,background:"rgba(255,255,255,.06)",border:"1.5px solid rgba(255,255,255,.12)",borderRadius:10,padding:"8px 10px",color:"#E6E8EC",fontFamily:D,fontWeight:600,fontSize:13,cursor:"pointer"},
+  section:{borderRadius:15,overflow:"hidden"},
+  sectionHead:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"13px 15px",cursor:"pointer"},
+  sectionTitle:{fontFamily:D,fontWeight:600,fontSize:14.5},sectionHint:{fontFamily:"var(--body)",fontWeight:400,fontSize:11,color:"#6E737D"},
+  donePill:{fontSize:10.5,fontWeight:700,border:"1.5px solid",borderRadius:999,padding:"3px 11px"},
+  sectionBody:{padding:"0 15px 14px"},
+  li:{fontSize:13,color:"#C8CDD5",lineHeight:1.7},tiny:{fontSize:11.5,color:"#7B818C",marginTop:8,lineHeight:1.5},
+  progWrap:{display:"flex",alignItems:"center",gap:10,margin:"14px 0 16px"},
+  progTrack:{flex:1,height:7,borderRadius:999,background:"rgba(255,255,255,.08)",overflow:"hidden",border:"1px solid rgba(255,255,255,.06)"},
+  progLabel:{fontSize:11,color:"#9AA0AB",fontWeight:600,whiteSpace:"nowrap"},
+  list:{display:"flex",flexDirection:"column",gap:10},
+  card:{borderRadius:16,padding:"13px 15px"},
+  cardTop:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:10},
+  exName:{fontFamily:D,fontWeight:600,fontSize:16,lineHeight:1.15},
+  target:{fontSize:12,color:"#8A8F98",margin:"4px 0 11px",fontWeight:500},
+  inputRow:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10},
+  fieldLabel:{fontSize:10,color:"#6E737D",fontWeight:600,letterSpacing:"0.05em",textTransform:"uppercase"},
+  lastNote:{marginTop:9,fontSize:11,color:"#737884"},
+  suggest:{marginTop:7,fontSize:12,fontWeight:600},
+  bwCard:{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:14,padding:"13px 15px",borderRadius:16},
+  bwLabel:{fontSize:13,color:"#C9CDD4",fontWeight:500},
+  macroGrid:{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:14},
+  macroCard:{borderRadius:14,padding:"13px 4px",textAlign:"center"},
+  macroVal:{fontFamily:D,fontWeight:700,fontSize:16},macroKey:{fontSize:10,color:"#8A8F98",marginTop:3},
+  waterCard:{borderRadius:16,padding:"13px 15px",marginBottom:14},
+  waterDots:{display:"grid",gridTemplateColumns:"repeat(12,1fr)",gap:6},
+  mealFood:{fontSize:12.5,color:"#B6BBC4",lineHeight:1.55,marginTop:9},
+  guideToggle:{width:"100%",marginTop:16,display:"flex",justifyContent:"space-between",alignItems:"center",borderRadius:14,padding:"13px 15px",color:"#C9CDD4",fontSize:13,fontWeight:600,fontFamily:"var(--body)"},
+  dietNote:{fontSize:12.5,lineHeight:1.5,color:"#AEB3BC",borderRadius:12,padding:"11px 13px"},
+  reset:{width:"100%",marginTop:16,display:"flex",justifyContent:"center",alignItems:"center",gap:7,background:"rgba(192,98,90,.08)",border:"1px solid rgba(192,98,90,.35)",borderRadius:13,padding:"11px",color:"#D17A72",fontSize:13,fontWeight:600,fontFamily:"var(--body)"},
+  footer:{marginTop:18,fontSize:11,color:"#565B64",textAlign:"center",lineHeight:1.5}
+};
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
